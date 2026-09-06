@@ -17,7 +17,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.util import dt as dt_util
 
-from .control_const import CONTROL_TYPES
 from .ginlong_base import BaseAPI, GinlongData, PortalConfig
 from .soliscloud_const import (
     INVERTER_ACPOWER,
@@ -153,10 +152,6 @@ class InverterService:
         capabilities = await self._do_discover()
 
         if capabilities:
-            if self.controllable:
-                inverter_serials = list(capabilities.keys())
-                await self._discover_controls(inverter_serials)
-
             if self._discovery_callback and self._discovery_cookie:
                 self._discovery_callback(capabilities, self._discovery_cookie)
             self._retry_delay_seconds = 0
@@ -173,29 +168,6 @@ class InverterService:
                 self._discovery_cookie,
                 self._retry_delay_seconds,
             )
-
-    async def _discover_controls(self, inverter_serials: list[str]):
-        _LOGGER.debug(f"Starting controls discovery")
-        controls = {}
-        control_lookup = {CONTROL_TYPES[platform]: platform for platform in CONTROL_TYPES}
-        for inverter_sn in inverter_serials:
-            controls[inverter_sn] = {platform: [] for platform in CONTROL_TYPES}
-            hmi_flag = self._api.hmi_fb00(inverter_sn)
-            _LOGGER.debug(f"Inverter SN {inverter_sn} HMI status {hmi_flag}")
-            control_desciptions = ALL_CONTROLS[hmi_flag]
-            for cid in control_desciptions:
-                button = len(control_desciptions[cid]) > 1
-                initial_value = await self._api.get_control_data(inverter_sn, cid)
-                initial_value = initial_value.get(cid, None)
-                for index, entity_description in enumerate(control_desciptions[cid]):
-                    entity_type = control_lookup[type(entity_description)]
-                    controls[inverter_sn][entity_type].append((cid, index, entity_description, button, initial_value))
-                    _LOGGER.debug(
-                        f"Adding {entity_type:s} entity {entity_description.name:s} for inverter Sn {inverter_sn:s} cid {cid:s} with index {index:d}"
-                    )
-
-        self._controls = controls
-        _LOGGER.debug(f"Controls discovery complete")
 
     async def _do_discover(self) -> dict[str, list[str]]:
         """Discover for all inverters the attributes it supports"""
@@ -320,22 +292,6 @@ class InverterService:
         """Schedule a discovery after seconds seconds."""
         _LOGGER.debug("Scheduling discovery in %s seconds.", seconds)
         self._discovery_callback = callback
-    "acoutputvoltage2": [
-        "AC Voltage S",
-        UnitOfElectricPotential.VOLT,
-        "mdi:flash-outline",
-        SensorDeviceClass.VOLTAGE,
-        SensorStateClass.MEASUREMENT,
-        PHASE2_VOLTAGE,
-    ],
-    "acoutputvoltage3": [
-        "AC Voltage T",
-        UnitOfElectricPotential.VOLT,
-        "mdi:flash-outline",
-        SensorDeviceClass.VOLTAGE,
-        SensorStateClass.MEASUREMENT,
-        PHASE3_VOLTAGE,
-    ],
         self._discovery_cookie = cookie
         nxt = dt_util.utcnow() + timedelta(seconds=seconds)
         async_track_point_in_utc_time(self._hass, self.async_discover, nxt)
