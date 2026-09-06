@@ -17,7 +17,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.util import dt as dt_util
 
-from .control_const import ALL_CONTROLS, CONTROL_TYPES
+from .control_const import CONTROL_TYPES
 from .ginlong_base import BaseAPI, GinlongData, PortalConfig
 from .soliscloud_const import (
     INVERTER_ACPOWER,
