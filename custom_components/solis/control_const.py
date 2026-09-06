@@ -130,8 +130,5 @@ ALL_CONTROLS = {
                 native_max_value=110,
                 native_step=1,
             )
-        ],
-        "696": [
-            SolisNumberEntityDescription(
-    },
+        ]
 }
