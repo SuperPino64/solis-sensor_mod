@@ -218,19 +218,7 @@ class SoliscloudAPI(BaseAPI):
                 return self._is_online
             else:
                 _LOGGER.debug("Valid inverters: %s", list(self._inverter_list.keys()))
-            try:
-                if not self.config._password:
-                    _LOGGER.info("No control password set; control mode disabled")
-                    self._token = ""
-                else:
-                    token = await self._fetch_token(self.config.username, self.config._password)
-                    self._token = token
-                    if token == "":
-                        _LOGGER.info("Failed to acquire CSRF token")
-                    else:
-                        _LOGGER.debug("CSRF token acquired")
-            except:
-                _LOGGER.info("Failed to acquire CSRF token")
+            self._token = ""
 
         return self.is_online
 
@@ -444,17 +432,6 @@ class SoliscloudAPI(BaseAPI):
 
             # Convert kW into W, etc. depending on unit returned from API.
             self._fix_units(GRID_TOTAL_POWER, GRID_TOTAL_POWER_STR)
-            self._fix_units(BAT_POWER, BAT_POWER_STR)
-            self._fix_units(BAT_CURRENT, BAT_CURRENT_STR)
-            self._fix_units(BAT_VOLTAGE, BAT_VOLTAGE_STR)
-            self._fix_units(BAT_DAILY_ENERGY_CHARGED, BAT_DAILY_ENERGY_CHARGED_STR)
-            self._fix_units(BAT_DAILY_ENERGY_DISCHARGED, BAT_DAILY_ENERGY_DISCHARGED_STR)
-            self._fix_units(BAT_MONTHLY_ENERGY_CHARGED, BAT_MONTHLY_ENERGY_CHARGED_STR)
-            self._fix_units(BAT_MONTHLY_ENERGY_DISCHARGED, BAT_MONTHLY_ENERGY_DISCHARGED_STR)
-            self._fix_units(BAT_YEARLY_ENERGY_CHARGED, BAT_YEARLY_ENERGY_CHARGED_STR)
-            self._fix_units(BAT_YEARLY_ENERGY_DISCHARGED, BAT_YEARLY_ENERGY_DISCHARGED_STR)
-            self._fix_units(BAT_TOTAL_ENERGY_CHARGED, BAT_TOTAL_ENERGY_CHARGED_STR)
-            self._fix_units(BAT_TOTAL_ENERGY_DISCHARGED, BAT_TOTAL_ENERGY_DISCHARGED_STR)
             self._fix_units(GRID_TOTAL_CONSUMPTION_POWER, GRID_TOTAL_CONSUMPTION_POWER_STR)
             self._fix_units(PLANT_TOTAL_CONSUMPTION_POWER, PLANT_TOTAL_CONSUMPTION_POWER_STR)
             self._fix_units(GRID_TOTAL_ENERGY_USED, GRID_TOTAL_ENERGY_USED_STR)
