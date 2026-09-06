@@ -160,7 +160,7 @@ class InverterService:
             if self._discovery_callback and self._discovery_cookie:
                 self._discovery_callback(capabilities, self._discovery_cookie)
             self._retry_delay_seconds = 0
-            self._dicovery_complete = True
+            self._discovery_complete = True
         else:
             self._retry_delay_seconds = min(MAX_RETRY_DELAY_SECONDS, self._retry_delay_seconds + RETRY_DELAY_SECONDS)
             _LOGGER.warning(
@@ -320,6 +320,22 @@ class InverterService:
         """Schedule a discovery after seconds seconds."""
         _LOGGER.debug("Scheduling discovery in %s seconds.", seconds)
         self._discovery_callback = callback
+    "acoutputvoltage2": [
+        "AC Voltage S",
+        UnitOfElectricPotential.VOLT,
+        "mdi:flash-outline",
+        SensorDeviceClass.VOLTAGE,
+        SensorStateClass.MEASUREMENT,
+        PHASE2_VOLTAGE,
+    ],
+    "acoutputvoltage3": [
+        "AC Voltage T",
+        UnitOfElectricPotential.VOLT,
+        "mdi:flash-outline",
+        SensorDeviceClass.VOLTAGE,
+        SensorStateClass.MEASUREMENT,
+        PHASE3_VOLTAGE,
+    ],
         self._discovery_cookie = cookie
         nxt = dt_util.utcnow() + timedelta(seconds=seconds)
         async_track_point_in_utc_time(self._hass, self.async_discover, nxt)
