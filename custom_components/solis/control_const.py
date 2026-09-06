@@ -115,20 +115,3 @@ CONTROL_TYPES = {
     "select": SolisSelectEntityDescription,
     "button": SolisButtonEntityDescription,
 }
-
-ALL_CONTROLS = {
-    True: {
-      
-        "15": [
-            SolisNumberEntityDescription(
-                name="Power limit setting",
-                key="power_limit_setting",
-                native_unit_of_measurement=PERCENTAGE,
-                device_class=NumberDeviceClass.POWER_FACTOR,
-                icon="mdi:transmission-tower-export",
-                native_min_value=0,
-                native_max_value=110,
-                native_step=1,
-            )
-        ]
-}}
