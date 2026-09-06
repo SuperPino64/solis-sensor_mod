@@ -57,8 +57,6 @@ AUTHENTICATE = "/v2/api/login"
 CONTROL = "/v2/api/control"
 AT_READ = "/v2/api/atRead"
 
-from .control_const import ALL_CONTROLS
-
 InverterDataType = dict[str, dict[str, list]]
 
 """{endpoint: [payload type, {key type, decimal precision}]}"""
