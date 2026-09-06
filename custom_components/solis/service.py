@@ -155,7 +155,7 @@ class InverterService:
             if self._discovery_callback and self._discovery_cookie:
                 self._discovery_callback(capabilities, self._discovery_cookie)
             self._retry_delay_seconds = 0
-            self._discovery_complete = True
+            self._dicovery_complete = True
         else:
             self._retry_delay_seconds = min(MAX_RETRY_DELAY_SECONDS, self._retry_delay_seconds + RETRY_DELAY_SECONDS)
             _LOGGER.warning(
