@@ -53,9 +53,7 @@ VERB = "POST"
 INVERTER_DETAIL = "/v1/api/inverterDetail"
 PLANT_DETAIL = "/v1/api/stationDetail"
 PLANT_LIST = "/v1/api/userStationList"
-AUTHENTICATE = "/v2/api/login"
-CONTROL = "/v2/api/control"
-AT_READ = "/v2/api/atRead"
+
 
 InverterDataType = dict[str, dict[str, list]]
 
@@ -617,24 +615,6 @@ class SoliscloudAPI(BaseAPI):
                 await resp.release()
             return result
 
-    async def _fetch_token(self, username: str, password: str) -> str:
-        """
-        Fetch CSRF token for station control
-        """
-        params = {
-            "username": username,
-            "password": hashlib.md5(password.encode("utf-8")).hexdigest(),
-        }
-        result = await self._post_data_json(AUTHENTICATE, params)
-
-        if result[SUCCESS] is True:
-            jsondata: dict[str, str] = result[CONTENT]
-            if "csrfToken" in jsondata:
-                return jsondata["csrfToken"]
-            else:
-                _LOGGER.info(f"({AUTHENTICATE:s} responded with error: {jsondata}")
-        else:
-            _LOGGER.info("Unable to fetch authentication token with username and password")
-        return ""
+    
 
   
