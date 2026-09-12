@@ -244,10 +244,30 @@ class SoliscloudAPI(BaseAPI):
         device_ids = {}
 
         params = {"stationId": plant_id}
-        result = await self._post_data_json("/v1/api/inverterList", params)
+
+        result = None
+        for attempt in range(3):
+            result = await self._post_data_json("/v1/api/inverterList", params)
+
+            if result and result.get(SUCCESS):
+                break
+
+            _LOGGER.warning(
+                "inverterList attempt %s failed: %s",
+                attempt + 1,
+                result,
+            )
+
+            await asyncio.sleep(5)
+
+        if result is None:
+            return device_ids
 
         if result[SUCCESS] is True:
             result_json: dict = result[CONTENT]
+
+            _LOGGER.debug("inverterList response: %s", result_json)
+
             if result_json["code"] != "0":
                 _LOGGER.info(
                     "%s responded with error: %s:%s",
@@ -256,20 +276,39 @@ class SoliscloudAPI(BaseAPI):
                     result_json["msg"],
                 )
                 return device_ids
+
             try:
                 for record in result_json["data"]["page"]["records"]:
                     serial = record.get("sn")
                     device_id = record.get("id")
+
+                    _LOGGER.debug(
+                        "Found inverter serial=%s device_id=%s",
+                        serial,
+                        device_id,
+                    )
+
                     device_ids[serial] = device_id
+
             except TypeError:
-                _LOGGER.debug("Response contains unexpected data: %s", result_json)
+                _LOGGER.debug(
+                    "Response contains unexpected data: %s",
+                    result_json,
+                )
+
         elif result[STATUS_CODE] == 408:
             now = datetime.now().strftime("%d-%m-%Y %H:%M GMT")
             _LOGGER.warning(
-                "Your system time must be set correctly for this integration \
-            to work, your time is %s",
+                "Your system time must be set correctly for this integration "
+                "to work, your time is %s",
                 now,
             )
+        else:
+            _LOGGER.error(
+                "inverterList failed after retries: %s",
+                result,
+            )
+
         return device_ids
 
     async def fetch_inverter_data(self, inverter_serial: str, controls=True) -> GinlongData | None:
@@ -563,7 +602,7 @@ class SoliscloudAPI(BaseAPI):
         if self._session is None:
             return result
         try:
-            async with async_timeout.timeout(10):
+            async with async_timeout.timeout(30):
                 resp = await self._session.get(url, params=params)
 
                 result[STATUS_CODE] = resp.status
