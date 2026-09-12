@@ -309,7 +309,12 @@ class SoliscloudAPI(BaseAPI):
                     self._post_process()
                     return GinlongData(self._data | control_data)
 
-                _LOGGER.debug("Unexpected response from server: %s", payload)
+                _LOGGER.error(
+                    "fetch_inverter_data failed: payload=%s, payload_detail=%s, data=%s",
+                    payload if 'payload' in locals() else None,
+                    payload_detail if 'payload_detail' in locals() else None,
+                    self._data,
+                    )
         return None
 
     async def _get_inverter_details(self, device_id: str, device_serial: str) -> dict[str, Any] | None:
@@ -334,6 +339,11 @@ class SoliscloudAPI(BaseAPI):
                 )
                 return None
         else:
+            _LOGGER.error(
+                "Unable to fetch details for device %s, result=%s",
+                device_id,
+                result,
+                )
             _LOGGER.info("Unable to fetch details for device with ID: %s", device_id)
         return jsondata
 
@@ -380,7 +390,11 @@ class SoliscloudAPI(BaseAPI):
                     jsondata["msg"],
                 )
         else:
-            _LOGGER.info("Unable to fetch details for Station with ID: %s", plant_id)
+            _LOGGER.error(
+                "Unable to fetch details for station %s, result=%s",
+                plant_id,
+                result,
+                )            
         return None
 
     def _collect_station_list_data(self, payload: dict[str, Any]) -> None:
