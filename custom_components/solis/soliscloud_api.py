@@ -364,7 +364,21 @@ class SoliscloudAPI(BaseAPI):
         # Get inverter details
         params = {"id": device_id, "sn": device_serial}
 
-        result = await self._post_data_json(INVERTER_DETAIL, params)
+        result = None
+        for attempt in range(3):
+            result = await self._post_data_json(INVERTER_DETAIL, params)
+
+            if result and result.get(SUCCESS):
+                break
+
+            _LOGGER.warning(
+                "inverterDetail attempt %s failed for %s: %s",
+                attempt + 1,
+                device_serial,
+                result,
+            )
+
+            await asyncio.sleep(5)
 
         jsondata = None
         if result[SUCCESS] is True:
@@ -602,7 +616,7 @@ class SoliscloudAPI(BaseAPI):
         if self._session is None:
             return result
         try:
-            async with async_timeout.timeout(30):
+            async with async_timeout.timeout(60):
                 resp = await self._session.get(url, params=params)
 
                 result[STATUS_CODE] = resp.status
@@ -659,7 +673,7 @@ class SoliscloudAPI(BaseAPI):
         if self._session is None:
             return result
         try:
-            async with async_timeout.timeout(30):
+            async with async_timeout.timeout(60):
                 url = f"{self.config.domain}{canonicalized_resource}"
                 resp = await self._session.post(url, json=params, headers=header)
 
