@@ -206,10 +206,20 @@ class SoliscloudAPI(BaseAPI):
             for inv in list(self._inverter_list):
                 data = await self.fetch_inverter_data(inv)
                 try:
+                    if data is None:
+                        _LOGGER.error(
+                            "fetch_inverter_data returned None for inverter %s",
+                            inv,
+                            )
+                        continue
                     self._plant_name = getattr(data, INVERTER_PLANT_NAME)
                 except AttributeError:
-                    _LOGGER.info("No access to inverter %s, removing", inv)
-                    del self._inverter_list[inv]
+                    _LOGGER.exception(
+                        "Failed validating inverter %s. Data returned: %s",
+                        inv,
+                        data,
+                    )
+                    #del self._inverter_list[inv]
             if len(self._inverter_list) == 0:
                 _LOGGER.warning("No valid inverters found, login failed")
                 self._is_online = False
